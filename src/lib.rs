@@ -1,17 +1,19 @@
 #![feature(unsafe_destructor)]
+#![warn(missing_docs)]
+#![unstable]
 
 extern crate nalgebra;
 
 use std::default::Default;
 use nalgebra::Vec2;
 
-use shape::Shape;
-
 pub use components::{ButtonComponent, TextComponent};
+pub use shape::Shape;
 
 mod components;
 mod shape;
 
+/// Indicates how a component should be displayed.
 pub enum RenderOutput<'a> {
     HorizontalBox {
         children: Vec<RenderOutput<'a>>,
@@ -23,6 +25,7 @@ pub enum RenderOutput<'a> {
 }
 
 pub trait Component: Send + Sync + 'static {
+    /// Returns the list of things that must be drawn.
     fn render(&self) -> RenderOutput;
 
     fn get_bounding_box(&self) -> Option<((u32, u32), (u32, u32))> {
@@ -30,11 +33,13 @@ pub trait Component: Send + Sync + 'static {
     }
 }
 
+/// The main struct of this library. Manages the whole user interface.
 pub struct Ui<T> {
     main_component: T,
     shapes: Vec<Shape>,
 }
 
+/// Allows mutable access to the main component of the `Ui`.
 pub struct UiMainComponentMutRef<'a, T: 'a> {
     ui: &'a mut Ui<T>,
 }
@@ -50,20 +55,24 @@ impl<T> Ui<T> where T: Component {
         ui
     }
 
+    /// Sets the viewport of the user interface.
     pub fn set_viewport(&mut self, width: u32, height: u32) {
         self.update();
     }
 
+    /// Changes the position of the mouse over the UI.
     pub fn set_mouse_position(&mut self, x: u32, y: u32) {
         self.update();
     }
 
+    /// Gives a mutable access to the main component in order for you to modify it.
     pub fn get_mut_main_component(&mut self) -> UiMainComponentMutRef<T> {
         UiMainComponentMutRef { ui: self }
     }
 
+    /// Returns the list of all the shapes that must be drawn as part of this UI.
     pub fn draw(&self) -> &[Shape] {
-        self.shapes.as_slice()
+        &self.shapes[]
     }
 
     fn update(&mut self) {
