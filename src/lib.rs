@@ -86,6 +86,8 @@ impl<T> Ui<T> where T: Component {
     }
 
     /// Returns the list of all the shapes that must be drawn as part of this UI.
+    ///
+    /// The list is sorted from bottom-z-to-top.
     pub fn draw(&self) -> &[Shape] {
         &self.shapes[]
     }

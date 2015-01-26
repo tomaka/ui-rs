@@ -6,3 +6,12 @@ authors = ["Pierre Krieger <pierre.krieger1708@gmail.com>"]
 
 [dependencies]
 nalgebra = "*"
+
+[dev-dependencies.glium_renderer]
+path = "glium_renderer"
+
+[dev-dependencies.glium]
+git = "https://github.com/tomaka/glium"
+
+[dev-dependencies.glutin]
+git = "https://github.com/tomaka/glutin"
