@@ -43,10 +43,10 @@ impl UiSystem {
 
                     glium::VertexBuffer::new(display, 
                         vec![
-                            Vertex { position: [-1.0, -1.0], tex_coords: [0.0, 0.0] },
-                            Vertex { position: [-1.0,  1.0], tex_coords: [0.0, 1.0] },
-                            Vertex { position: [ 1.0,  1.0], tex_coords: [1.0, 1.0] },
-                            Vertex { position: [ 1.0, -1.0], tex_coords: [1.0, 0.0] }
+                            Vertex { position: [0.0, 0.0], tex_coords: [0.0, 0.0] },
+                            Vertex { position: [0.0, 2.0], tex_coords: [0.0, 1.0] },
+                            Vertex { position: [2.0, 2.0], tex_coords: [1.0, 1.0] },
+                            Vertex { position: [2.0, 0.0], tex_coords: [1.0, 0.0] }
                         ]
                     ).into_vertex_buffer_any()
                 },
