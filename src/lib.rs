@@ -21,12 +21,27 @@ pub enum RenderOutput<'a> {
 
     Component(&'a Component),
 
+    /// The component should draw a shape. Note that the position of the shape is relative to
+    /// the position of the component on the screen.
+    ///
+    /// **Important**: if you manually return shapes, your component should also implement
+    /// `get_dimensions` and `get_bounding_box`.
     Shape(Shape),
 }
 
 pub trait Component: Send + Sync + 'static {
     /// Returns the list of things that must be drawn.
     fn render(&self) -> RenderOutput;
+
+    /// Returns the dimensions of the component. If returns `None`, the dimensions are
+    /// automatically calculated using what `render` returns.
+    ///
+    /// If `render` only returns shapes, then your component will have a dimension of `(0.0, 0.0)`.
+    ///
+    /// The dimensions are used when calculating layouts.
+    fn get_dimensions(&self) -> Option<Vec2<f32>> {
+        None
+    }
 
     fn get_bounding_box(&self) -> Option<((u32, u32), (u32, u32))> {
         None
@@ -76,28 +91,33 @@ impl<T> Ui<T> where T: Component {
     }
 
     fn update(&mut self) {
-        self.shapes = process(self.main_component.render(), Vec2::new(0.0, 0.0));
+        let (shapes, _) = process(self.main_component.render(), Vec2::new(0.0, 0.0));
+        self.shapes = shapes;
     }
 }
 
-fn process(output: RenderOutput, mut current_position: Vec2<f32>) -> Vec<Shape> {
+fn process(output: RenderOutput, mut current_position: Vec2<f32>) -> (Vec<Shape>, Vec2<f32>) {
     match output {
         RenderOutput::HorizontalBox { children } => {
             let mut shapes = Vec::new();
+            let mut max_height = 0.0;
             for child in children.into_iter() {
-                let mut max_width = 0.0;
-                for shape in process(child, current_position).into_iter() {
-                    max_width = std::cmp::partial_max(max_width, shape.get_width()).unwrap_or(0.0);
-                    shapes.push(shape);
-                }
-                current_position.x += max_width;
+                let (child_shapes, child_dims) = process(child, current_position);
+                max_height = std::cmp::partial_max(max_height, child_dims.y).unwrap_or(max_height);
+                shapes.extend(child_shapes.into_iter());
+                current_position.x += child_dims.x;
             }
-            shapes
+            (shapes, current_position)
         },
-        RenderOutput::Component(child) => process(child.render(), current_position),
+        RenderOutput::Component(child) => {
+            let dimensions = child.get_dimensions();
+            let (shapes, alt_dims) = process(child.render(), current_position);
+            let dimensions = dimensions.unwrap_or(alt_dims);
+            (shapes, dimensions)
+        },
         RenderOutput::Shape(shape) => {
             let shape = shape.translate(current_position);
-            vec![shape]
+            (vec![shape], Vec2::new(0.0, 0.0))
         },
     }
 }

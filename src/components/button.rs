@@ -35,4 +35,9 @@ impl Component for ButtonComponent {
             color: self.color,
         })
     }
+
+    fn get_dimensions(&self) -> Option<Vec2<f32>> {
+        // FIXME:
+        Some(Vec2::new(0.1, 0.1))
+    }
 }

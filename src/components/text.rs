@@ -38,4 +38,10 @@ impl Component for TextComponent {
             }
         )
     }
+
+    fn get_dimensions(&self) -> Option<Vec2<f32>> {
+        // FIXME:
+        let width = self.text.len() as f32;
+        Some(Vec2::new(width, 1.0))
+    }
 }

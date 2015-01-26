@@ -87,43 +87,6 @@ impl Default for Font {
 }
 
 impl Shape {
-    pub fn get_width(&self) -> f32 {
-        match self {
-            &Shape::Point { .. } => unimplemented!(),
-            &Shape::Line { ref from, ref to, .. } => {
-                to.x - from.x
-            },
-            &Shape::Rectangle { ref from, ref to, .. } => {
-                to.x - from.x
-            },
-            &Shape::Image { ref from, ref to, .. } => {
-                to.x - from.x
-            },
-            &Shape::Text { ref text, em, .. } => {
-                // FIXME: 
-                (text.len() as f32) * em
-            },
-        }
-    }
-
-    pub fn get_height(&self) -> f32 {
-        match self {
-            &Shape::Point { .. } => unimplemented!(),
-            &Shape::Line { ref from, ref to, .. } => {
-                to.y - from.y
-            },
-            &Shape::Rectangle { ref from, ref to, .. } => {
-                to.y - from.y
-            },
-            &Shape::Image { ref from, ref to, .. } => {
-                to.y - from.y
-            },
-            &Shape::Text { em, .. } => {
-                em
-            },
-        }
-    }
-
     /// Moves a shape by the given coordinates.
     pub fn translate(mut self, vec: Vec2<f32>) -> Shape {
         match &mut self {
