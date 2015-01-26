@@ -3,18 +3,27 @@ extern crate glium_renderer;
 extern crate glutin;
 extern crate ui;
 
+use std::default::Default;
 use glium::Surface;
 
-#[derive(Default)]
 pub struct MyWidget {
     left_button: ui::ButtonComponent,
     text: ui::TextComponent,
     right_button: ui::ButtonComponent,
 }
 
+impl Default for MyWidget {
+    fn default() -> MyWidget {
+        MyWidget {
+            left_button: Default::default(),
+            right_button: Default::default(),
+            text: ui::TextComponent::new("0".to_string(), Default::default(), 0.1),
+        }
+    }
+}
+
 impl MyWidget {
     pub fn set_number(&mut self, num: i32) {
-        self.text.set_em(0.1);
         self.text.set_text(format!("{}", num));
     }
 }
