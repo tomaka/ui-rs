@@ -6,13 +6,17 @@ extern crate glium;
 extern crate glium_macros;
 extern crate glium_text;
 extern crate glutin;
+extern crate nalgebra;
 extern crate ui;
 
 use std::default::Default;
+use std::sync::Arc;
+use nalgebra::Mat4;
 use glium::Surface;
 
 pub struct UiSystem {
     text: glium_text::TextSystem,
+    default_font: Arc<glium_text::FontTexture>,
     rectangle: (glium::vertex::VertexBufferAny, glium::IndexBuffer),
     rectangles_program: glium::Program,
     images_program: glium::Program,
@@ -22,6 +26,11 @@ impl UiSystem {
     pub fn new(display: &glium::Display) -> UiSystem {
         UiSystem {
             text: glium_text::TextSystem::new(display),
+
+            default_font: Arc::new({
+                let file = std::io::fs::File::open(&Path::new("C:\\Windows\\Fonts\\Arial.ttf"));
+                glium_text::FontTexture::new(display, file, 70).ok().unwrap()   // FIXME: remove ok()
+            }),
 
             rectangle: (
                 {
@@ -111,6 +120,20 @@ impl UiSystem {
                     target.draw(&self.rectangle.0, &self.rectangle.1, &self.rectangles_program,
                                 &uniforms, &Default::default());
                 },
+
+                &ui::Shape::Text { ref text, ref font, ref bottom_left, ref em } => {
+                    let em = *em * 20.0;        // FIXME: why?
+                    let text = glium_text::TextDisplay::new(&self.text, self.default_font.clone(),
+                                                            &text[]);
+
+                    let mat = Mat4::new(em, 0.0, 0.0, bottom_left.x,       // TODO: perspective
+                                           0.0, em, 0.0, bottom_left.y,
+                                           0.0,   0.0, 1.0, 0.0,
+                                           0.0,   0.0, 0.0, 1.0);
+
+                    glium_text::draw(&text, &self.text, target, mat, (1.0, 1.0, 1.0, 1.0));
+                },
+
                 _ => {}
             }
         }

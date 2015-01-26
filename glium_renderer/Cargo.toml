@@ -4,6 +4,12 @@ name = "glium_renderer"
 version = "0.0.1"
 authors = ["Pierre Krieger <pierre.krieger1708@gmail.com>"]
 
+#[dependencies]
+#nalgebra = "*"
+
+[dependencies.nalgebra]
+git = "https://github.com/sebcrozet/nalgebra"
+
 [dependencies.glium]
 git = "https://github.com/tomaka/glium"
 
