@@ -37,9 +37,11 @@ fn main() {
         .build_glium()
         .unwrap();
 
+    let dimensions = display.get_framebuffer_dimensions();
+
     let system = glium_renderer::UiSystem::new(&display);
 
-    let mut ui = ui::Ui::new(<MyWidget as ::std::default::Default>::default());
+    let mut ui = ui::Ui::new(<MyWidget as ::std::default::Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
     ui.get_mut_main_component().set_number(3);
 
     'main: loop {
@@ -48,11 +50,15 @@ fn main() {
         system.draw(&mut target, &ui);
         target.finish();
 
-        for event in display.wait_events() {
-            match event {
-                glutin::Event::Closed => break 'main,
-                _ => ()
-            }
+        match display.wait_events().next().unwrap() {
+            glutin::Event::Closed => break 'main,
+            glutin::Event::Resized(w, h) => {
+                ui.set_viewport(ui::Vec2::new(w, h));
+            },
+            glutin::Event::MouseMoved((x, y)) => {
+                ui.set_mouse_position(Some(ui::Vec2::new(x as u32, y as u32)));
+            },
+            _ => ()
         }
     }
 }
