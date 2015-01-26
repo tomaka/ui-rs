@@ -8,13 +8,15 @@ use shape::{Font, Shape};
 pub struct TextComponent {
     text: String,
     font: Font,
+    em: f32,
 }
 
 impl TextComponent {
-    pub fn new(text: String, font: Font) -> TextComponent {
+    pub fn new(text: String, font: Font, em: f32) -> TextComponent {
         TextComponent {
             text: text,
             font: font,
+            em: em,
         }
     }
 
@@ -25,6 +27,10 @@ impl TextComponent {
     pub fn set_font(&mut self, font: Font) {
         self.font = font;
     }
+
+    pub fn set_em(&mut self, em: f32) {
+        self.em = em;
+    }
 }
 
 impl Component for TextComponent {
@@ -34,14 +40,14 @@ impl Component for TextComponent {
                 text: self.text.clone(),
                 font: self.font.clone(),
                 bottom_left: Vec2::new(0.0, 0.0),
-                em: 1.0,
+                em: self.em,
             }
         )
     }
 
     fn get_dimensions(&self) -> Option<Vec2<f32>> {
         // FIXME:
-        let width = self.text.len() as f32;
-        Some(Vec2::new(width, 1.0))
+        let width = self.em * self.text.len() as f32;
+        Some(Vec2::new(width, self.em))
     }
 }

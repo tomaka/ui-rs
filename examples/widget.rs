@@ -14,6 +14,7 @@ pub struct MyWidget {
 
 impl MyWidget {
     pub fn set_number(&mut self, num: i32) {
+        self.text.set_em(0.1);
         self.text.set_text(format!("{}", num));
     }
 }

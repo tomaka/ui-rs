@@ -22,7 +22,7 @@ impl Default for ButtonComponent {
     fn default() -> ButtonComponent {
         ButtonComponent {
             color: [1.0, 1.0, 0.0],
-            label: TextComponent::new("Button".to_string(), Font::Button),
+            label: TextComponent::new("Button".to_string(), Font::Button, 0.1),
         }
     }
 }
