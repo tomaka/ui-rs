@@ -28,7 +28,7 @@ impl UiSystem {
             text: glium_text::TextSystem::new(display),
 
             default_font: Arc::new({
-                let file = std::io::fs::File::open(&Path::new("C:\\Windows\\Fonts\\Arial.ttf"));
+                let file = std::old_io::fs::File::open(&Path::new("C:\\Windows\\Fonts\\Arial.ttf"));
                 glium_text::FontTexture::new(display, file, 70).ok().unwrap()   // FIXME: remove ok()
             }),
 
