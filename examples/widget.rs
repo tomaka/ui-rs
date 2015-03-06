@@ -51,6 +51,27 @@ impl ui::Component for MyWidget {
     }   
 }
 
+pub struct MyWidgetWithWidgets {
+    widgets: Vec<MyWidget>,
+}
+
+impl Default for MyWidgetWithWidgets {
+    fn default() -> MyWidgetWithWidgets {
+        MyWidgetWithWidgets {
+            widgets: vec![Default::default(), Default::default(), Default::default()],
+        }
+    }
+}
+
+impl ui::Component for MyWidgetWithWidgets {
+    type EmittedEvent = ();
+    type ReceivedEvent = ();
+
+    fn get_layout(&mut self) -> ui::Layout {
+        ui::Layout::HorizontalBox(self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect())
+    }
+}
+
 fn main() {
     use glium::DisplayBuild;
     let display = glutin::WindowBuilder::new()
@@ -61,8 +82,7 @@ fn main() {
 
     let system = glium_renderer::UiSystem::new(&display);
 
-    let mut ui = ui::Ui::new(<MyWidget as ::std::default::Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
-    ui.get_mut_main_component().set_number(3);
+    let mut ui = ui::Ui::new(<MyWidgetWithWidgets as ::std::default::Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
 
     'main: loop {
         let mut target = display.draw();

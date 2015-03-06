@@ -135,7 +135,15 @@ impl<T> RawComponent for T where T: Component {
     }
 
     fn get_width(&mut self) -> f32 {
-        unimplemented!()
+        match self.get_layout() {
+            Layout::SingleChild(child) => {
+                child.get_width()
+            },
+            Layout::HorizontalBox(children) => {
+                use std::iter::AdditiveIterator;
+                children.into_iter().map(|c| c.get_width()).sum()
+            },
+        }
     }
 
     fn handle_raw_child_event(&mut self, child_id: usize, event: Box<Any>) -> Option<Box<Any>> {
