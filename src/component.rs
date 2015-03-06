@@ -21,4 +21,7 @@ pub trait RawComponent {
 
     /// Returns the width of the component.
     fn get_width(&mut self) -> f32;
+
+    /// Returns the height of the component.
+    fn get_height(&mut self) -> f32;
 }

@@ -47,6 +47,8 @@ pub enum Layout<'a> {
     SingleChild(&'a mut RawComponent),
 
     HorizontalBox(Vec<&'a mut RawComponent>),
+
+    VerticalBox(Vec<&'a mut RawComponent>),
 }
 
 impl<T> RawComponent for T where T: Component {
@@ -55,6 +57,7 @@ impl<T> RawComponent for T where T: Component {
             Layout::SingleChild(child) => {
                 child.render()
             },
+
             Layout::HorizontalBox(children) => {
                 let mut result = Vec::new();
                 let mut x = 0.0;
@@ -62,6 +65,18 @@ impl<T> RawComponent for T where T: Component {
                 for child in children {
                     result.extend(child.render().into_iter().map(|s| s.translate(Vec2::new(x, 0.0))));
                     x += child.get_width();
+                }
+
+                result
+            },
+
+            Layout::VerticalBox(children) => {
+                let mut result = Vec::new();
+                let mut y = 0.0;
+
+                for child in children {
+                    result.extend(child.render().into_iter().map(|s| s.translate(Vec2::new(0.0, y))));
+                    y += child.get_height();
                 }
 
                 result
@@ -74,6 +89,7 @@ impl<T> RawComponent for T where T: Component {
             Layout::SingleChild(child) => {
                 child.set_mouse_position(position).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
             },
+
             Layout::HorizontalBox(children) => {
                 let mut events = Vec::with_capacity(0);
 
@@ -106,6 +122,39 @@ impl<T> RawComponent for T where T: Component {
 
                 events
             },
+
+            Layout::VerticalBox(children) => {
+                let mut events = Vec::with_capacity(0);
+
+                if let Some(position) = position {
+                    let mut position = position;
+                    let mut found = false;
+
+                    for (child_id, child) in children.into_iter().enumerate() {
+                        if found {
+                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                            continue;
+                        }
+
+                        if child.hit_test(position) {
+                            events.extend(child.set_mouse_position(Some(position)).into_iter().map(|ev| (child_id, ev)));
+                            found = true;
+                            continue;
+                        } else {
+                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                        }
+
+                        position.y -= child.get_height();
+                    }
+
+                } else {
+                    for (child_id, child) in children.into_iter().enumerate() {
+                        events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                    }
+                }
+
+                events
+            },
         };
 
         events.into_iter().filter_map(|(id, ev)| {
@@ -118,6 +167,7 @@ impl<T> RawComponent for T where T: Component {
             Layout::SingleChild(child) => {
                 child.hit_test(position)
             },
+
             Layout::HorizontalBox(children) => {
                 let mut position = position;
 
@@ -131,6 +181,20 @@ impl<T> RawComponent for T where T: Component {
 
                 false
             },
+
+            Layout::VerticalBox(children) => {
+                let mut position = position;
+
+                for child in children {
+                    if child.hit_test(position) {
+                        return true;
+                    }
+
+                    position.y -= child.get_height();
+                }
+
+                false
+            },
         }
     }
 
@@ -139,9 +203,45 @@ impl<T> RawComponent for T where T: Component {
             Layout::SingleChild(child) => {
                 child.get_width()
             },
+
             Layout::HorizontalBox(children) => {
                 use std::iter::AdditiveIterator;
                 children.into_iter().map(|c| c.get_width()).sum()
+            },
+
+            Layout::VerticalBox(children) => {
+                let mut max = 0.0;
+                for child in children {
+                    let width = child.get_width();
+                    if width > max {
+                        max = width;
+                    }
+                }
+                max
+            },
+        }
+    }
+
+    fn get_height(&mut self) -> f32 {
+        match self.get_layout() {
+            Layout::SingleChild(child) => {
+                child.get_height()
+            },
+
+            Layout::HorizontalBox(children) => {
+                let mut max = 0.0;
+                for child in children {
+                    let width = child.get_height();
+                    if width > max {
+                        max = width;
+                    }
+                }
+                max
+            },
+
+            Layout::VerticalBox(children) => {
+                use std::iter::AdditiveIterator;
+                children.into_iter().map(|c| c.get_height()).sum()
             },
         }
     }

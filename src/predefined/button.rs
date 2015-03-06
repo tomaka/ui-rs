@@ -64,6 +64,10 @@ impl RawComponent for ButtonComponent {
         0.1     // TODO:
     }
 
+    fn get_height(&mut self) -> f32 {
+        0.1     // TODO:
+    }
+
     fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
         unreachable!();
     }

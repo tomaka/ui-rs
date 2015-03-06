@@ -64,6 +64,10 @@ impl RawComponent for TextComponent {
         self.em * self.text.len() as f32
     }
 
+    fn get_height(&mut self) -> f32 {
+        self.em
+    }
+
     fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
         unreachable!();
     }

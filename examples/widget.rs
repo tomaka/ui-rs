@@ -68,7 +68,7 @@ impl ui::Component for MyWidgetWithWidgets {
     type ReceivedEvent = ();
 
     fn get_layout(&mut self) -> ui::Layout {
-        ui::Layout::HorizontalBox(self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect())
+        ui::Layout::VerticalBox(self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect())
     }
 }
 
