@@ -7,6 +7,7 @@ use std::default::Default;
 use glium::Surface;
 
 pub struct MyWidget {
+    value: i32,
     left_button: ui::predefined::ButtonComponent,
     text: ui::predefined::TextComponent,
     right_button: ui::predefined::ButtonComponent,
@@ -15,6 +16,7 @@ pub struct MyWidget {
 impl Default for MyWidget {
     fn default() -> MyWidget {
         MyWidget {
+            value: 0,
             left_button: Default::default(),
             right_button: Default::default(),
             text: ui::predefined::TextComponent::new("0".to_string(), Default::default(), 0.1),
@@ -24,6 +26,7 @@ impl Default for MyWidget {
 
 impl MyWidget {
     pub fn set_number(&mut self, num: i32) {
+        self.value = num;
         self.text.set_text(format!("{}", num));
     }
 }
@@ -32,16 +35,19 @@ impl ui::Component for MyWidget {
     type EmittedEvent = ();
     type ReceivedEvent = ui::predefined::button::PressedEvent;
 
-    fn get_layout(&self) -> ui::Layout {
-        ui::Layout::HorizontalBox(vec![&self.left_button, &self.text, &self.right_button])
-    }
-
-    fn get_mut_layout(&mut self) -> ui::MutLayout {
-        ui::MutLayout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
+    fn get_layout(&mut self) -> ui::Layout {
+        ui::Layout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
     }
 
     fn handle_child_event(&mut self, child_id: usize, event: &ui::predefined::button::PressedEvent) {
-        println!("{} {:?}", child_id, event);
+        if child_id == 0 {
+            let value = self.value;
+            self.set_number(value - 1);
+
+        } else if child_id == 2 {
+            let value = self.value;
+            self.set_number(value + 1);
+        }
     }   
 }
 

@@ -33,7 +33,7 @@ impl Default for ButtonComponent {
 }
 
 impl RawComponent for ButtonComponent {
-    fn render(&self) -> Vec<Shape> {
+    fn render(&mut self) -> Vec<Shape> {
         vec![Shape::Rectangle {
             from: Vec2::new(0.0, 0.0),
             to: Vec2::new(0.1, 0.1),
@@ -56,11 +56,11 @@ impl RawComponent for ButtonComponent {
         }
     }
 
-    fn hit_test(&self, pos: Vec2<f32>) -> bool {
+    fn hit_test(&mut self, pos: Vec2<f32>) -> bool {
         pos.x >= 0.0 && pos.x < self.get_width() && pos.y >= 0.0 && pos.y < 0.1
     }
 
-    fn get_width(&self) -> f32 {
+    fn get_width(&mut self) -> f32 {
         0.1     // TODO:
     }
 

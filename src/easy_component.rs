@@ -12,10 +12,7 @@ pub trait Component: Send + Sync + 'static {
     type ReceivedEvent: 'static = ();
 
     /// 
-    fn get_layout(&self) -> Layout;
-
-    /// 
-    fn get_mut_layout(&mut self) -> MutLayout;
+    fn get_layout(&mut self) -> Layout;
 
     /// A child has produced an event.
     fn handle_child_event(&mut self, child_id: usize, &Self::ReceivedEvent) {
@@ -47,19 +44,13 @@ pub trait Component: Send + Sync + 'static {
 }
 
 pub enum Layout<'a> {
-    SingleChild(&'a RawComponent),
-
-    HorizontalBox(Vec<&'a RawComponent>),
-}
-
-pub enum MutLayout<'a> {
     SingleChild(&'a mut RawComponent),
 
     HorizontalBox(Vec<&'a mut RawComponent>),
 }
 
 impl<T> RawComponent for T where T: Component {
-    fn render(&self) -> Vec<Shape> {
+    fn render(&mut self) -> Vec<Shape> {
         match self.get_layout() {
             Layout::SingleChild(child) => {
                 child.render()
@@ -79,11 +70,11 @@ impl<T> RawComponent for T where T: Component {
     }
 
     fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) -> Vec<Box<Any>> {
-        let events = match self.get_mut_layout() {
-            MutLayout::SingleChild(child) => {
+        let events = match self.get_layout() {
+            Layout::SingleChild(child) => {
                 child.set_mouse_position(position).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
             },
-            MutLayout::HorizontalBox(children) => {
+            Layout::HorizontalBox(children) => {
                 let mut events = Vec::with_capacity(0);
 
                 if let Some(position) = position {
@@ -122,7 +113,7 @@ impl<T> RawComponent for T where T: Component {
         }).collect()
     }
 
-    fn hit_test(&self, position: Vec2<f32>) -> bool {
+    fn hit_test(&mut self, position: Vec2<f32>) -> bool {
         match self.get_layout() {
             Layout::SingleChild(child) => {
                 child.hit_test(position)
@@ -143,7 +134,7 @@ impl<T> RawComponent for T where T: Component {
         }
     }
 
-    fn get_width(&self) -> f32 {
+    fn get_width(&mut self) -> f32 {
         unimplemented!()
     }
 

@@ -8,7 +8,7 @@ use std::default::Default;
 
 pub use nalgebra::Vec2;
 pub use shape::Shape;
-pub use easy_component::{Component, MutLayout, Layout};
+pub use easy_component::{Component, Layout};
 pub use ui::{Ui, UiMainComponentMutRef};
 
 pub mod component;
