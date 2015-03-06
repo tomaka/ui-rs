@@ -82,7 +82,7 @@ fn main() {
 
     let system = glium_renderer::UiSystem::new(&display);
 
-    let mut ui = ui::Ui::new(<MyWidgetWithWidgets as ::std::default::Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
+    let mut ui = ui::Ui::new(<MyWidgetWithWidgets as Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
 
     'main: loop {
         let mut target = display.draw();
