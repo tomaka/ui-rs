@@ -1,3 +1,4 @@
+use std::any::Any;
 use nalgebra::Vec2;
 
 use component::RawComponent;
@@ -17,7 +18,7 @@ pub trait Component: Send + Sync + 'static {
     fn get_mut_layout(&mut self) -> MutLayout;
 
     /// A child has produced an event.
-    fn handle_child_event(&mut self, Self::ReceivedEvent) {
+    fn handle_child_event(&mut self, child_id: usize, &Self::ReceivedEvent) {
     }
 
     /// Sets whether this component is hovered by the mouse or not.
@@ -77,40 +78,48 @@ impl<T> RawComponent for T where T: Component {
         }
     }
 
-    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) {
-        match self.get_mut_layout() {
+    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) -> Vec<Box<Any>> {
+        let events = match self.get_mut_layout() {
             MutLayout::SingleChild(child) => {
-                child.set_mouse_position(position)
+                child.set_mouse_position(position).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
             },
             MutLayout::HorizontalBox(children) => {
+                let mut events = Vec::with_capacity(0);
+
                 if let Some(position) = position {
                     let mut position = position;
                     let mut found = false;
 
-                    for child in children {
+                    for (child_id, child) in children.into_iter().enumerate() {
                         if found {
-                            child.set_mouse_position(None);
+                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
                             continue;
                         }
 
                         if child.hit_test(position) {
-                            child.set_mouse_position(Some(position));
+                            events.extend(child.set_mouse_position(Some(position)).into_iter().map(|ev| (child_id, ev)));
                             found = true;
                             continue;
                         } else {
-                            child.set_mouse_position(None);
+                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
                         }
 
                         position.x -= child.get_width();
                     }
 
                 } else {
-                    for child in children {
-                        child.set_mouse_position(None);
+                    for (child_id, child) in children.into_iter().enumerate() {
+                        events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
                     }
                 }
+
+                events
             },
-        }
+        };
+
+        events.into_iter().filter_map(|(id, ev)| {
+            self.handle_raw_child_event(id, ev)
+        }).collect()
     }
 
     fn hit_test(&self, position: Vec2<f32>) -> bool {
@@ -136,6 +145,15 @@ impl<T> RawComponent for T where T: Component {
 
     fn get_width(&self) -> f32 {
         unimplemented!()
+    }
+
+    fn handle_raw_child_event(&mut self, child_id: usize, event: Box<Any>) -> Option<Box<Any>> {
+        if let Some(event) = event.downcast_ref() {
+            let event: &<Self as Component>::ReceivedEvent = event;
+            self.handle_child_event(child_id, event);
+        }
+
+        None
     }
 }
 

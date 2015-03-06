@@ -1,3 +1,4 @@
+use std::any::Any;
 use std::default::Default;
 use std::sync::atomic::{AtomicBool, Ordering};
 use nalgebra::Vec2;
@@ -11,6 +12,9 @@ pub struct ButtonComponent {
     label: TextComponent,
     hovered: AtomicBool,
 }
+
+#[derive(Debug, Clone)]
+pub struct PressedEvent;
 
 impl ButtonComponent {
     pub fn set_color(&mut self, color: [f32; 3]) {
@@ -41,11 +45,14 @@ impl RawComponent for ButtonComponent {
         }]
     }
 
-    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) {
+    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) -> Vec<Box<Any>> {
         if position.is_some() {
             self.hovered.store(true, Ordering::Relaxed);
+            vec![Box::new(PressedEvent)]
+
         } else {
             self.hovered.store(false, Ordering::Relaxed);
+            Vec::with_capacity(0)
         }
     }
 
@@ -55,5 +62,9 @@ impl RawComponent for ButtonComponent {
 
     fn get_width(&self) -> f32 {
         0.1     // TODO:
+    }
+
+    fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
+        unreachable!();
     }
 }

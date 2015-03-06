@@ -1,4 +1,5 @@
 use nalgebra::{Vec2};
+use std::any::Any;
 use std::default::Default;
 use shape::{Font, Shape};
 
@@ -51,7 +52,8 @@ impl RawComponent for TextComponent {
         ]
     }
 
-    fn set_mouse_position(&mut self, _: Option<Vec2<f32>>) {
+    fn set_mouse_position(&mut self, _: Option<Vec2<f32>>) -> Vec<Box<Any>> {
+        Vec::with_capacity(0)
     }
 
     fn hit_test(&self, pos: Vec2<f32>) -> bool {
@@ -60,5 +62,9 @@ impl RawComponent for TextComponent {
 
     fn get_width(&self) -> f32 {
         self.em * self.text.len() as f32
+    }
+
+    fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
+        unreachable!();
     }
 }
