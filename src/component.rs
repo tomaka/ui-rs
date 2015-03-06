@@ -14,7 +14,7 @@ pub trait RawComponent {
     /// Tells the component where the mouse is. `None` if the mouse is not over the element.
     ///
     /// Returns a list of events to pass to the parent.
-    fn set_mouse_position(&mut self, Option<Vec2<f32>>) -> Vec<Box<Any>>;
+    fn set_mouse_status(&mut self, Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>>;
 
     /// Asks the component whether the given position touches it.
     fn hit_test(&mut self, Vec2<f32>) -> bool;

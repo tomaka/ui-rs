@@ -12,6 +12,7 @@ pub struct Ui<T> {
     shapes: Vec<Shape>,
     viewport: Vec2<u32>,
     mouse: Option<Vec2<u32>>,
+    mouse_pressed: bool,
 }
 
 /// Allows mutable access to the main component of the `Ui`.
@@ -26,6 +27,7 @@ impl<T> Ui<T> where T: RawComponent {
             shapes: Vec::new(),
             viewport: viewport,
             mouse: None,
+            mouse_pressed: false,
         };
 
         ui.update();
@@ -41,6 +43,12 @@ impl<T> Ui<T> where T: RawComponent {
     /// Changes the position of the mouse over the UI.
     pub fn set_mouse_position(&mut self, position: Option<Vec2<u32>>) {
         self.mouse = position;
+        self.update();
+    }
+
+    /// Sets whether the mouse is pressed.
+    pub fn set_mouse_pressed(&mut self, pressed: bool) {
+        self.mouse_pressed = pressed;
         self.update();
     }
 
@@ -65,7 +73,7 @@ impl<T> Ui<T> where T: RawComponent {
         }).unwrap_or(Vec2::new(-1.0, -1.0));
 
         //self.main_component.set_viewport      // TODO: 
-        self.main_component.set_mouse_position(Some(mouse));
+        self.main_component.set_mouse_status(Some(mouse), self.mouse_pressed);
         self.shapes = self.main_component.render();
     }
 }

@@ -98,6 +98,12 @@ fn main() {
             glutin::Event::MouseMoved((x, y)) => {
                 ui.set_mouse_position(Some(ui::Vec2::new(x as u32, y as u32)));
             },
+            glutin::Event::MouseInput(glutin::ElementState::Pressed, glutin::MouseButton::Left) => {
+                ui.set_mouse_pressed(true);
+            },
+            glutin::Event::MouseInput(glutin::ElementState::Released, glutin::MouseButton::Left) => {
+                ui.set_mouse_pressed(false);
+            },
             _ => ()
         }
     }

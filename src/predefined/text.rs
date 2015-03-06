@@ -52,7 +52,7 @@ impl RawComponent for TextComponent {
         ]
     }
 
-    fn set_mouse_position(&mut self, _: Option<Vec2<f32>>) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, _: Option<Vec2<f32>>, _: bool) -> Vec<Box<Any>> {
         Vec::with_capacity(0)
     }
 

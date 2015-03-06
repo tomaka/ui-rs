@@ -84,10 +84,10 @@ impl<T> RawComponent for T where T: Component {
         }
     }
 
-    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>> {
         let events = match self.get_layout() {
             Layout::SingleChild(child) => {
-                child.set_mouse_position(position).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
+                child.set_mouse_status(position, pressed).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
             },
 
             Layout::HorizontalBox(children) => {
@@ -99,16 +99,16 @@ impl<T> RawComponent for T where T: Component {
 
                     for (child_id, child) in children.into_iter().enumerate() {
                         if found {
-                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                             continue;
                         }
 
                         if child.hit_test(position) {
-                            events.extend(child.set_mouse_position(Some(position)).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(Some(position), pressed).into_iter().map(|ev| (child_id, ev)));
                             found = true;
                             continue;
                         } else {
-                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                         }
 
                         position.x -= child.get_width();
@@ -116,7 +116,7 @@ impl<T> RawComponent for T where T: Component {
 
                 } else {
                     for (child_id, child) in children.into_iter().enumerate() {
-                        events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                        events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                     }
                 }
 
@@ -132,16 +132,16 @@ impl<T> RawComponent for T where T: Component {
 
                     for (child_id, child) in children.into_iter().enumerate() {
                         if found {
-                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                             continue;
                         }
 
                         if child.hit_test(position) {
-                            events.extend(child.set_mouse_position(Some(position)).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(Some(position), pressed).into_iter().map(|ev| (child_id, ev)));
                             found = true;
                             continue;
                         } else {
-                            events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                            events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                         }
 
                         position.y -= child.get_height();
@@ -149,7 +149,7 @@ impl<T> RawComponent for T where T: Component {
 
                 } else {
                     for (child_id, child) in children.into_iter().enumerate() {
-                        events.extend(child.set_mouse_position(None).into_iter().map(|ev| (child_id, ev)));
+                        events.extend(child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
                     }
                 }
 
