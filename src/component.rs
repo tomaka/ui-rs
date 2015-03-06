@@ -14,4 +14,7 @@ pub trait RawComponent {
 
     /// Asks the component whether the given position touches it.
     fn hit_test(&self, Vec2<f32>) -> bool;
+
+    /// Returns the width of the component.
+    fn get_width(&self) -> f32;
 }

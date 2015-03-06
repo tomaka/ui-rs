@@ -50,6 +50,10 @@ impl RawComponent for ButtonComponent {
     }
 
     fn hit_test(&self, pos: Vec2<f32>) -> bool {
-        true
+        pos.x >= 0.0 && pos.x < self.get_width() && pos.y >= 0.0 && pos.y < 0.1
+    }
+
+    fn get_width(&self) -> f32 {
+        0.1     // TODO:
     }
 }

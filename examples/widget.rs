@@ -31,6 +31,14 @@ impl MyWidget {
 impl ui::Component for MyWidget {
     type EmittedEvent = ();
     type ReceivedEvent = ();
+
+    fn get_layout(&self) -> ui::Layout {
+        ui::Layout::HorizontalBox(vec![&self.left_button, &self.text, &self.right_button])
+    }
+
+    fn get_mut_layout(&mut self) -> ui::MutLayout {
+        ui::MutLayout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
+    }
 }
 
 fn main() {

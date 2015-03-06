@@ -10,6 +10,12 @@ pub trait Component: Send + Sync + 'static {
     /// What events type this component expects to receive.
     type ReceivedEvent: 'static = ();
 
+    /// 
+    fn get_layout(&self) -> Layout;
+
+    /// 
+    fn get_mut_layout(&mut self) -> MutLayout;
+
     /// A child has produced an event.
     fn handle_child_event(&mut self, Self::ReceivedEvent) {
     }
@@ -39,16 +45,97 @@ pub trait Component: Send + Sync + 'static {
     }
 }
 
+pub enum Layout<'a> {
+    SingleChild(&'a RawComponent),
+
+    HorizontalBox(Vec<&'a RawComponent>),
+}
+
+pub enum MutLayout<'a> {
+    SingleChild(&'a mut RawComponent),
+
+    HorizontalBox(Vec<&'a mut RawComponent>),
+}
+
 impl<T> RawComponent for T where T: Component {
     fn render(&self) -> Vec<Shape> {
-        vec![]
+        match self.get_layout() {
+            Layout::SingleChild(child) => {
+                child.render()
+            },
+            Layout::HorizontalBox(children) => {
+                let mut result = Vec::new();
+                let mut x = 0.0;
+
+                for child in children {
+                    result.extend(child.render().into_iter().map(|s| s.translate(Vec2::new(x, 0.0))));
+                    x += child.get_width();
+                }
+
+                result
+            },
+        }
     }
 
-    fn set_mouse_position(&mut self, _: Option<Vec2<f32>>) {
+    fn set_mouse_position(&mut self, position: Option<Vec2<f32>>) {
+        match self.get_mut_layout() {
+            MutLayout::SingleChild(child) => {
+                child.set_mouse_position(position)
+            },
+            MutLayout::HorizontalBox(children) => {
+                if let Some(position) = position {
+                    let mut position = position;
+                    let mut found = false;
+
+                    for child in children {
+                        if found {
+                            child.set_mouse_position(None);
+                            continue;
+                        }
+
+                        if child.hit_test(position) {
+                            child.set_mouse_position(Some(position));
+                            found = true;
+                            continue;
+                        } else {
+                            child.set_mouse_position(None);
+                        }
+
+                        position.x -= child.get_width();
+                    }
+
+                } else {
+                    for child in children {
+                        child.set_mouse_position(None);
+                    }
+                }
+            },
+        }
     }
 
-    fn hit_test(&self, _: Vec2<f32>) -> bool {
-        false
+    fn hit_test(&self, position: Vec2<f32>) -> bool {
+        match self.get_layout() {
+            Layout::SingleChild(child) => {
+                child.hit_test(position)
+            },
+            Layout::HorizontalBox(children) => {
+                let mut position = position;
+
+                for child in children {
+                    if child.hit_test(position) {
+                        return true;
+                    }
+
+                    position.x -= child.get_width();
+                }
+
+                false
+            },
+        }
+    }
+
+    fn get_width(&self) -> f32 {
+        unimplemented!()
     }
 }
 
