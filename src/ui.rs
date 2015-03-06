@@ -4,9 +4,7 @@ use std::cmp;
 use nalgebra::Vec2;
 use shape::Shape;
 
-use Component;
-use RenderOutput;
-use HoveredStatus;
+use component::RawComponent;
 
 /// The main struct of this library. Manages the whole user interface.
 pub struct Ui<T> {
@@ -21,7 +19,7 @@ pub struct UiMainComponentMutRef<'a, T: 'a> {
     ui: &'a mut Ui<T>,
 }
 
-impl<T> Ui<T> where T: Component {
+impl<T> Ui<T> where T: RawComponent {
     pub fn new(component: T, viewport: Vec2<u32>) -> Ui<T> {
         let mut ui = Ui {
             main_component: component,
@@ -55,7 +53,7 @@ impl<T> Ui<T> where T: Component {
     ///
     /// The list is sorted from bottom-z-to-top.
     pub fn draw(&self) -> &[Shape] {
-        &self.shapes[]
+        &self.shapes
     }
 
     fn update(&mut self) {
@@ -66,97 +64,9 @@ impl<T> Ui<T> where T: Component {
             )
         }).unwrap_or(Vec2::new(-1.0, -1.0));
 
-        let (shapes, _, hierarchy, all) = process(self.main_component.render(), Vec2::new(0.0, 0.0),
-                                                  mouse);
-        self.shapes = shapes;
-
-        for elem in all.iter() {
-            let mut found = false;
-            for (num, element) in hierarchy.iter().enumerate() {
-                if unsafe {
-                    let x: ::std::raw::TraitObject = ::std::mem::transmute(*element);
-                    let y: ::std::raw::TraitObject = ::std::mem::transmute(*elem);
-                    x.data == y.data && x.vtable == y.vtable
-                }
-                {
-                    found = true;
-                    element.set_hovered_status(if num == 0 {
-                        HoveredStatus::Hovered
-                    } else {
-                        HoveredStatus::ChildHovered
-                    });
-                    break;
-                }
-            }
-
-            if !found {
-                elem.set_hovered_status(HoveredStatus::NotHovered);
-            }
-        }
-    }
-}
-
-/// Returns a list of shapes to draw, the dimensions of the output, and the hierarchy of components
-/// that are under the mouse cursor from inner to outter, and the hierarchy of all components.
-fn process<'a>(output: RenderOutput<'a>, mut current_position: Vec2<f32>, mouse: Vec2<f32>)
-               -> (Vec<Shape>, Vec2<f32>, Vec<&'a Component>, Vec<&'a Component>)
-{
-    match output {
-        RenderOutput::HorizontalBox { children } => {
-            let mut shapes = Vec::new();
-            let mut max_height = 0.0;
-            let mut main_hierarchy = None;
-            let mut all = Vec::new();
-
-            for child in children.into_iter() {
-                let (child_shapes, child_dims, hierarchy, child_all) = process(child, current_position, mouse);
-                all.extend(child_all.into_iter());
-                if hierarchy.len() != 0 {
-                    main_hierarchy = Some(hierarchy);
-                }
-
-                max_height = cmp::partial_max(max_height, child_dims.y).unwrap_or(max_height);
-                shapes.extend(child_shapes.into_iter());
-                current_position.x += child_dims.x;
-            }
-
-            (shapes, current_position, main_hierarchy.unwrap_or(vec![]), all)
-        },
-
-        RenderOutput::Component(child) => {
-            let dimensions = child.get_dimensions();
-            let bounding_box = child.get_bounding_box();
-            let (shapes, alt_dims, mut hierarchy, mut all) = process(child.render(), current_position, mouse);
-            let dimensions = dimensions.unwrap_or(alt_dims);
-
-            let hierarchy = if let Some(bounding_box) = bounding_box {
-                if mouse.x >= bounding_box.0.x + current_position.x &&
-                    mouse.x <= bounding_box.1.x + current_position.x &&
-                    mouse.y >= bounding_box.0.y + current_position.y &&
-                    mouse.y <= bounding_box.1.y + current_position.y
-                {
-                    vec![child]
-                } else {
-                    vec![]
-                }
-
-            } else {
-                if hierarchy.len() == 0 {
-                    vec![]
-                } else {
-                    hierarchy.push(child);
-                    hierarchy
-                }
-            };
-
-            all.push(child);
-            (shapes, dimensions, hierarchy, all)
-        },
-
-        RenderOutput::Shape(shape) => {
-            let shape = shape.translate(current_position);
-            (vec![shape], Vec2::new(0.0, 0.0), vec![], vec![])
-        },
+        //self.main_component.set_viewport      // TODO: 
+        self.main_component.set_mouse_position(Some(mouse));
+        self.shapes = self.main_component.render();
     }
 }
 
@@ -175,7 +85,7 @@ impl<'a, T> DerefMut for UiMainComponentMutRef<'a, T> {
 }
 
 #[unsafe_destructor]
-impl<'a, T: 'a> Drop for UiMainComponentMutRef<'a, T> where T: Component {
+impl<'a, T: 'a> Drop for UiMainComponentMutRef<'a, T> where T: RawComponent {
     fn drop(&mut self) {
         self.ui.update();
     }

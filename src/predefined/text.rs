@@ -1,8 +1,8 @@
 use nalgebra::{Vec2};
 use std::default::Default;
-use Component;
-use RenderOutput;
 use shape::{Font, Shape};
+
+use component::RawComponent;
 
 #[derive(Default)]
 pub struct TextComponent {
@@ -31,23 +31,23 @@ impl TextComponent {
     pub fn set_em(&mut self, em: f32) {
         self.em = em;
     }
-}
 
-impl Component for TextComponent {
-    fn render(&self) -> RenderOutput {
-        RenderOutput::Shape(
-            Shape::Text {
-                text: self.text.clone(),
-                font: self.font.clone(),
-                bottom_left: Vec2::new(0.0, 0.0),
-                em: self.em,
-            }
-        )
-    }
-
-    fn get_dimensions(&self) -> Option<Vec2<f32>> {
+    fn get_dimensions(&self) -> Vec2<f32> {
         // FIXME:
         let width = self.em * self.text.len() as f32;
-        Some(Vec2::new(width, self.em))
+        Vec2::new(width, self.em)
+    }
+}
+
+impl RawComponent for TextComponent {
+    fn render(&self) -> Vec<Shape> {
+        vec![]      // FIXME: 
+    }
+
+    fn set_mouse_position(&mut self, _: Option<Vec2<f32>>) {
+    }
+
+    fn hit_test(&self, pos: Vec2<f32>) -> bool {
+        true
     }
 }

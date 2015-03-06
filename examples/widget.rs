@@ -7,9 +7,9 @@ use std::default::Default;
 use glium::Surface;
 
 pub struct MyWidget {
-    left_button: ui::ButtonComponent,
-    text: ui::TextComponent,
-    right_button: ui::ButtonComponent,
+    left_button: ui::predefined::ButtonComponent,
+    text: ui::predefined::TextComponent,
+    right_button: ui::predefined::ButtonComponent,
 }
 
 impl Default for MyWidget {
@@ -17,7 +17,7 @@ impl Default for MyWidget {
         MyWidget {
             left_button: Default::default(),
             right_button: Default::default(),
-            text: ui::TextComponent::new("0".to_string(), Default::default(), 0.1),
+            text: ui::predefined::TextComponent::new("0".to_string(), Default::default(), 0.1),
         }
     }
 }
@@ -29,15 +29,8 @@ impl MyWidget {
 }
 
 impl ui::Component for MyWidget {
-    fn render(&self) -> ui::RenderOutput {
-        ui::RenderOutput::HorizontalBox {
-            children: vec![
-                ui::RenderOutput::Component(&self.left_button),
-                ui::RenderOutput::Component(&self.text),
-                ui::RenderOutput::Component(&self.right_button),
-            ]
-        }
-    }
+    type EmittedEvent = ();
+    type ReceivedEvent = ();
 }
 
 fn main() {

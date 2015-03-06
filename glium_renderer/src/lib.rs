@@ -1,9 +1,8 @@
 #![feature(plugin)]
+#![plugin(glium_macros)]
 
 #[macro_use]
 extern crate glium;
-#[plugin]
-extern crate glium_macros;
 extern crate glium_text;
 extern crate glutin;
 extern crate nalgebra;
@@ -100,7 +99,7 @@ impl UiSystem {
         }
     }
 
-    pub fn draw<T, U>(&self, target: &mut T, ui: &ui::Ui<U>) where T: Surface, U: ui::Component {
+    pub fn draw<T, U>(&self, target: &mut T, ui: &ui::Ui<U>) where T: Surface, U: ui::component::RawComponent {
         for shape in ui.draw().iter() {
             match shape {
                 &ui::Shape::Point { .. } => unimplemented!(),
@@ -124,7 +123,7 @@ impl UiSystem {
                 &ui::Shape::Text { ref text, ref font, ref bottom_left, ref em } => {
                     let em = *em * 20.0;        // FIXME: why?
                     let text = glium_text::TextDisplay::new(&self.text, self.default_font.clone(),
-                                                            &text[]);
+                                                            &text[..]);
 
                     let mat = Mat4::new(em, 0.0, 0.0, bottom_left.x,       // TODO: perspective
                                            0.0, em, 0.0, bottom_left.y,

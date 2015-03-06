@@ -63,8 +63,10 @@ pub enum Shape {
 pub enum Image {
     /// The image corresponding to a regular button.
     UnhoveredButton,
+
     /// The image corresponding to a button behing hovered.
     HoveredButton,
+
     /// A custom image. Not used by this library's predefined components.
     Custom(String),
 }
@@ -74,8 +76,10 @@ pub enum Image {
 pub enum Font {
     /// The default font for regular text.
     Default,
+
     /// The font to use for the label over a button.
     Button,
+
     /// A custom font. Not used by this library's predefined components.
     Custom(String),
 }
