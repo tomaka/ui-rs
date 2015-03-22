@@ -1,5 +1,4 @@
 #![feature(plugin)]
-#![plugin(glium_macros)]
 
 #[macro_use]
 extern crate glium;
@@ -33,12 +32,13 @@ impl UiSystem {
 
             rectangle: (
                 {
-                    #[vertex_format]
                     #[derive(Copy)]
                     struct Vertex {
                         position: [f32; 2],
                         tex_coords: [f32; 2],
                     }
+
+                    implement_vertex!(Vertex, position, tex_coords);
 
                     glium::VertexBuffer::new(display, 
                         vec![
@@ -121,12 +121,11 @@ impl UiSystem {
                 },
 
                 &ui::Shape::Text { ref text, ref font, ref bottom_left, ref em } => {
-                    let em = *em * 20.0;        // FIXME: why?
                     let text = glium_text::TextDisplay::new(&self.text, self.default_font.clone(),
                                                             &text[..]);
 
-                    let mat = Mat4::new(em, 0.0, 0.0, bottom_left.x,       // TODO: perspective
-                                           0.0, em, 0.0, bottom_left.y,
+                    let mat = Mat4::new(*em, 0.0, 0.0, bottom_left.x,       // TODO: perspective
+                                           0.0, *em, 0.0, bottom_left.y,
                                            0.0,   0.0, 1.0, 0.0,
                                            0.0,   0.0, 0.0, 1.0);
 

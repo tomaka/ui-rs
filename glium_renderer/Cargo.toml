@@ -4,23 +4,11 @@ name = "glium_renderer"
 version = "0.0.1"
 authors = ["Pierre Krieger <pierre.krieger1708@gmail.com>"]
 
-#[dependencies]
-#nalgebra = "*"
-
-[dependencies.nalgebra]
-git = "https://github.com/sebcrozet/nalgebra"
-
-[dependencies.glium]
-git = "https://github.com/tomaka/glium"
-
-[dependencies.glium_macros]
-git = "https://github.com/tomaka/glium"
-
-[dependencies.glutin]
-git = "https://github.com/tomaka/glutin"
-
-[dependencies.glium_text]
-git = "https://github.com/tomaka/glium_text"
+[dependencies]
+nalgebra = "*"
+glium = "*"
+glutin = "*"
+glium_text = "*"
 
 [dependencies.ui]
 path = ".."

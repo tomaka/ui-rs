@@ -4,17 +4,12 @@ name = "ui"
 version = "0.0.1"
 authors = ["Pierre Krieger <pierre.krieger1708@gmail.com>"]
 
-#[dependencies]
-#nalgebra = "*"
+[dependencies]
+nalgebra = "*"
 
-[dependencies.nalgebra]
-git = "https://github.com/sebcrozet/nalgebra"
+[dev-dependencies]
+glutin = "*"
+glium = "*"
 
 [dev-dependencies.glium_renderer]
 path = "glium_renderer"
-
-[dev-dependencies.glium]
-git = "https://github.com/tomaka/glium"
-
-[dev-dependencies.glutin]
-git = "https://github.com/tomaka/glutin"
