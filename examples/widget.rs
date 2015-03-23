@@ -40,13 +40,13 @@ struct MyWidgetEvent;
 
 impl ui::Component for MyWidget {
     type EmittedEvent = MyWidgetEvent;
-    type ReceivedEvent = ui::predefined::button::PressedEvent;
+    type ReceivedEvent = ui::predefined::button::ButtonEvent;
 
     fn get_layout(&mut self) -> ui::Layout {
         ui::Layout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
     }
 
-    fn handle_child_event(&mut self, child_id: usize, event: &ui::predefined::button::PressedEvent)
+    fn handle_child_event(&mut self, child_id: usize, _: &ui::predefined::button::ButtonEvent)
                           -> Option<MyWidgetEvent>
     {
         if child_id == 0 {

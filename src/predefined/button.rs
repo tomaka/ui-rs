@@ -15,7 +15,9 @@ pub struct ButtonComponent {
 }
 
 #[derive(Debug, Clone)]
-pub struct PressedEvent;
+pub enum ButtonEvent {
+    Triggered,
+}
 
 impl ButtonComponent {
     pub fn set_color(&mut self, color: [f32; 3]) {
@@ -61,7 +63,7 @@ impl RawComponent for ButtonComponent {
         if position.is_some() && self.can_be_pressed &&
             self.previous_pressed_status == true && pressed == false
         {
-            ret.push(Box::new(PressedEvent) as Box<Any>);
+            ret.push(Box::new(ButtonEvent::Triggered) as Box<Any>);
         }
 
         if position.is_none() {
