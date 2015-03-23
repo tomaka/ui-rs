@@ -15,13 +15,16 @@ pub trait Component: Send + Sync + 'static {
     fn get_layout(&mut self) -> Layout;
 
     /// A child has produced an event.
-    fn handle_child_event(&mut self, child_id: usize, &Self::ReceivedEvent) {
+    fn handle_child_event(&mut self, child_id: usize, &Self::ReceivedEvent)
+                          -> Option<Self::EmittedEvent>
+    {
+        None
     }
 
     /// Sets whether this component is hovered by the mouse or not.
     ///
     /// The default action is not to do anything.
-    fn set_hovered_status(&self, HoveredStatus) { }
+    fn set_hovered_status(&self, HoveredStatus) -> Option<Self::EmittedEvent> { None }
 
     /// Returns the dimensions of the component. If returns `None`, the dimensions are
     /// automatically calculated using what `render` returns.
@@ -247,12 +250,14 @@ impl<T> RawComponent for T where T: Component {
     }
 
     fn handle_raw_child_event(&mut self, child_id: usize, event: Box<Any>) -> Option<Box<Any>> {
-        if let Some(event) = event.downcast_ref() {
+        let ev = if let Some(event) = event.downcast_ref() {
             let event: &<Self as Component>::ReceivedEvent = event;
-            self.handle_child_event(child_id, event);
-        }
+            self.handle_child_event(child_id, event)
+        } else {
+            panic!("Mismatch between emitted and received events")
+        };
 
-        None
+        ev.map(|ev| Box::new(ev) as Box<Any>)
     }
 }
 

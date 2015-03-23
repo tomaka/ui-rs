@@ -4,9 +4,10 @@ extern crate glutin;
 extern crate ui;
 
 use std::default::Default;
+use std::iter::AdditiveIterator;
 use glium::Surface;
 
-pub struct MyWidget {
+struct MyWidget {
     value: i32,
     left_button: ui::predefined::ButtonComponent,
     text: ui::predefined::TextComponent,
@@ -25,21 +26,29 @@ impl Default for MyWidget {
 }
 
 impl MyWidget {
-    pub fn set_number(&mut self, num: i32) {
+    fn get_number(&self) -> i32 {
+        self.value
+    }
+
+    fn set_number(&mut self, num: i32) {
         self.value = num;
         self.text.set_text(format!("{}", num));
     }
 }
 
+struct MyWidgetEvent;
+
 impl ui::Component for MyWidget {
-    type EmittedEvent = ();
+    type EmittedEvent = MyWidgetEvent;
     type ReceivedEvent = ui::predefined::button::PressedEvent;
 
     fn get_layout(&mut self) -> ui::Layout {
         ui::Layout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
     }
 
-    fn handle_child_event(&mut self, child_id: usize, event: &ui::predefined::button::PressedEvent) {
+    fn handle_child_event(&mut self, child_id: usize, event: &ui::predefined::button::PressedEvent)
+                          -> Option<MyWidgetEvent>
+    {
         if child_id == 0 {
             let value = self.value;
             self.set_number(value - 1);
@@ -48,27 +57,39 @@ impl ui::Component for MyWidget {
             let value = self.value;
             self.set_number(value + 1);
         }
-    }   
+
+        Some(MyWidgetEvent)
+    }
 }
 
-pub struct MyWidgetWithWidgets {
+struct MyWidgetWithWidgets {
     widgets: Vec<MyWidget>,
+    text: ui::predefined::TextComponent,
 }
 
 impl Default for MyWidgetWithWidgets {
     fn default() -> MyWidgetWithWidgets {
         MyWidgetWithWidgets {
             widgets: vec![Default::default(), Default::default(), Default::default()],
+            text: ui::predefined::TextComponent::new("0".to_string(), Default::default(), 0.1),
         }
     }
 }
 
 impl ui::Component for MyWidgetWithWidgets {
     type EmittedEvent = ();
-    type ReceivedEvent = ();
+    type ReceivedEvent = MyWidgetEvent;
 
     fn get_layout(&mut self) -> ui::Layout {
-        ui::Layout::VerticalBox(self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect())
+        let mut b: Vec<_> = self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect();
+        b.push(&mut self.text);
+        ui::Layout::VerticalBox(b)
+    }
+
+    fn handle_child_event(&mut self, _: usize, _: &MyWidgetEvent) -> Option<()> {
+        let val = self.widgets.iter().map(|w| w.get_number()).sum();
+        self.text.set_text(format!("{}", val));
+        None
     }
 }
 
