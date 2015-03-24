@@ -52,6 +52,14 @@ pub enum Layout<'a> {
     HorizontalBox(Vec<&'a mut RawComponent>),
 
     VerticalBox(Vec<&'a mut RawComponent>),
+
+    PositionnedChildren(Vec<PositionnedChild<'a>>),
+}
+
+pub struct PositionnedChild<'a> {
+    pub child: &'a mut RawComponent,
+    pub x: f32,
+    pub y: f32,
 }
 
 impl<T> RawComponent for T where T: Component {
@@ -82,6 +90,14 @@ impl<T> RawComponent for T where T: Component {
                     y += child.get_height();
                 }
 
+                result
+            },
+
+            Layout::PositionnedChildren(children) => {
+                let mut result = Vec::new();
+                for child in children {
+                    result.extend(child.child.render().into_iter().map(|s| s.translate(Vec2::new(child.x, child.y))));
+                }
                 result
             },
         }
@@ -158,6 +174,45 @@ impl<T> RawComponent for T where T: Component {
 
                 events
             },
+
+            Layout::PositionnedChildren(children) => {
+                let mut events = Vec::with_capacity(0);
+
+
+                if let Some(position) = position {
+                    let mut position = position;
+                    let mut found = false;
+
+                    for (child_id, child) in children.into_iter().enumerate() {
+                        let position = {
+                            let mut p = position;
+                            p.x -= child.x;
+                            p.y -= child.y;
+                            p
+                        };
+
+                        if found {
+                            events.extend(child.child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
+                            continue;
+                        }
+
+                        if child.child.hit_test(position) {
+                            events.extend(child.child.set_mouse_status(Some(position), pressed).into_iter().map(|ev| (child_id, ev)));
+                            found = true;
+                            continue;
+                        } else {
+                            events.extend(child.child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
+                        }
+                    }
+
+                } else {
+                    for (child_id, child) in children.into_iter().enumerate() {
+                        events.extend(child.child.set_mouse_status(None, pressed).into_iter().map(|ev| (child_id, ev)));
+                    }
+                }
+
+                events
+            },
         };
 
         events.into_iter().filter_map(|(id, ev)| {
@@ -198,6 +253,20 @@ impl<T> RawComponent for T where T: Component {
 
                 false
             },
+
+            Layout::PositionnedChildren(children) => {
+                for child in children {
+                    let mut position = position;
+                    position.x -= child.x;
+                    position.y -= child.y;
+
+                    if child.child.hit_test(position) {
+                        return true;
+                    }
+                }
+
+                false
+            },
         }
     }
 
@@ -222,6 +291,10 @@ impl<T> RawComponent for T where T: Component {
                 }
                 max
             },
+
+            Layout::PositionnedChildren(_) => {
+                0.0
+            },
         }
     }
 
@@ -245,6 +318,10 @@ impl<T> RawComponent for T where T: Component {
             Layout::VerticalBox(children) => {
                 use std::iter::AdditiveIterator;
                 children.into_iter().map(|c| c.get_height()).sum()
+            },
+
+            Layout::PositionnedChildren(_) => {
+                0.0
             },
         }
     }

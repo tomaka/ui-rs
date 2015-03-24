@@ -29,7 +29,13 @@ impl ui::Component for MainUi {
     type ReceivedEvent = left_bar::LeftBarWidgetEvent;
 
     fn get_layout(&mut self) -> ui::Layout {
-        ui::Layout::VerticalBox(vec![&mut self.left_bar as &mut RawComponent])
+        ui::Layout::PositionnedChildren(vec![
+            ui::PositionnedChild {
+                child: &mut self.left_bar as &mut RawComponent,
+                x: -0.5,
+                y: 0.0,
+            }
+        ])
     }
 
     fn handle_child_event(&mut self, child_id: usize, _: &left_bar::LeftBarWidgetEvent)
