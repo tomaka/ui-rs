@@ -1,15 +1,16 @@
 use std::any::Any;
+use std::marker::Reflect;
 use nalgebra::Vec2;
 
 use component::RawComponent;
 use Shape;
 
-pub trait Component: Send + Sync + 'static {
+pub trait Component: Reflect + Send + Sync + 'static {
     /// What events type this component produces.
-    type EmittedEvent: 'static = ();
+    type EmittedEvent: Reflect + 'static = ();
 
     /// What events type this component expects to receive.
-    type ReceivedEvent: 'static = ();
+    type ReceivedEvent: Reflect + 'static = ();
 
     /// 
     fn get_layout(&mut self) -> Layout;
@@ -277,8 +278,7 @@ impl<T> RawComponent for T where T: Component {
             },
 
             Layout::HorizontalBox(children) => {
-                use std::iter::AdditiveIterator;
-                children.into_iter().map(|c| c.get_width()).sum()
+                children.into_iter().map(|c| c.get_width()).fold(0.0, |a, i| a + i)
             },
 
             Layout::VerticalBox(children) => {
@@ -316,8 +316,7 @@ impl<T> RawComponent for T where T: Component {
             },
 
             Layout::VerticalBox(children) => {
-                use std::iter::AdditiveIterator;
-                children.into_iter().map(|c| c.get_height()).sum()
+                children.into_iter().map(|c| c.get_height()).fold(0.0, |a, i| a + i)
             },
 
             Layout::PositionnedChildren(_) => {

@@ -1,6 +1,5 @@
-#![feature(unsafe_destructor)]
+#![feature(core)]
 #![warn(missing_docs)]
-#![unstable]
 
 extern crate nalgebra;
 

@@ -16,7 +16,7 @@ pub struct Ui<T> {
 }
 
 /// Allows mutable access to the main component of the `Ui`.
-pub struct UiMainComponentMutRef<'a, T: 'a> {
+pub struct UiMainComponentMutRef<'a, T: 'a> where T: RawComponent {
     ui: &'a mut Ui<T>,
 }
 
@@ -78,7 +78,7 @@ impl<T> Ui<T> where T: RawComponent {
     }
 }
 
-impl<'a, T> Deref for UiMainComponentMutRef<'a, T> {
+impl<'a, T> Deref for UiMainComponentMutRef<'a, T> where T: RawComponent {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -86,13 +86,12 @@ impl<'a, T> Deref for UiMainComponentMutRef<'a, T> {
     }
 }
 
-impl<'a, T> DerefMut for UiMainComponentMutRef<'a, T> {
+impl<'a, T> DerefMut for UiMainComponentMutRef<'a, T> where T: RawComponent {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.ui.main_component
     }
 }
 
-#[unsafe_destructor]
 impl<'a, T: 'a> Drop for UiMainComponentMutRef<'a, T> where T: RawComponent {
     fn drop(&mut self) {
         self.ui.update();
