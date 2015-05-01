@@ -40,7 +40,7 @@ impl TextComponent {
     }
 }
 
-impl RawComponent for TextComponent {
+impl<E> RawComponent<E> for TextComponent {
     fn render(&mut self) -> Vec<Shape> {
         vec![
             Shape::Text {
@@ -52,12 +52,12 @@ impl RawComponent for TextComponent {
         ]
     }
 
-    fn set_mouse_status(&mut self, _: Option<Vec2<f32>>, _: bool) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, _: Option<Vec2<f32>>, _: bool) -> Vec<E> {
         Vec::with_capacity(0)
     }
 
     fn hit_test(&mut self, pos: Vec2<f32>) -> bool {
-        pos.x >= 0.0 && pos.x < self.get_width() && pos.y >= 0.0 && pos.y < self.em
+        pos.x >= 0.0 && pos.x < RawComponent::<E>::get_width(self) && pos.y >= 0.0 && pos.y < self.em
     }
 
     fn get_width(&mut self) -> f32 {
@@ -66,9 +66,5 @@ impl RawComponent for TextComponent {
 
     fn get_height(&mut self) -> f32 {
         self.em
-    }
-
-    fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
-        unreachable!();
     }
 }

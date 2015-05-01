@@ -4,7 +4,6 @@ extern crate glutin;
 extern crate ui;
 
 use std::default::Default;
-use std::iter::AdditiveIterator;
 use glium::Surface;
 
 mod left_bar;
@@ -20,7 +19,7 @@ fn main() {
 
     let system = glium_renderer::UiSystem::new(&display);
 
-    let mut ui = ui::Ui::new(<main_ui::MainUi as Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
+    let mut ui: ui::Ui<_, main_ui::MainUiEvent> = ui::Ui::new(<main_ui::MainUi as Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
 
     'main: loop {
         let mut target = display.draw();

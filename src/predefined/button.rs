@@ -37,7 +37,7 @@ impl Default for ButtonComponent {
     }
 }
 
-impl RawComponent for ButtonComponent {
+impl<E> RawComponent<E> for ButtonComponent where E: From<ButtonEvent> {
     fn render(&mut self) -> Vec<Shape> {
         vec![Shape::Rectangle {
             from: Vec2::new(0.0, 0.0),
@@ -50,7 +50,7 @@ impl RawComponent for ButtonComponent {
         }]
     }
 
-    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<E> {
         let mut ret = if position.is_some() {
             self.hovered = true;
             Vec::with_capacity(0)
@@ -63,7 +63,7 @@ impl RawComponent for ButtonComponent {
         if position.is_some() && self.can_be_pressed &&
             self.previous_pressed_status == true && pressed == false
         {
-            ret.push(Box::new(ButtonEvent::Triggered) as Box<Any>);
+            ret.push(From::from(ButtonEvent::Triggered));
         }
 
         if position.is_none() {
@@ -79,7 +79,7 @@ impl RawComponent for ButtonComponent {
     }
 
     fn hit_test(&mut self, pos: Vec2<f32>) -> bool {
-        pos.x >= 0.0 && pos.x < self.get_width() && pos.y >= 0.0 && pos.y < 0.1
+        pos.x >= 0.0 && pos.x < 0.1 && pos.y >= 0.0 && pos.y < 0.1
     }
 
     fn get_width(&mut self) -> f32 {
@@ -88,9 +88,5 @@ impl RawComponent for ButtonComponent {
 
     fn get_height(&mut self) -> f32 {
         0.1     // TODO:
-    }
-
-    fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
-        unreachable!();
     }
 }

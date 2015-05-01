@@ -1,5 +1,6 @@
 use std::ops::{Deref, DerefMut};
 use std::cmp;
+use std::marker::PhantomData;
 
 use nalgebra::Vec2;
 use shape::Shape;
@@ -7,8 +8,9 @@ use shape::Shape;
 use component::RawComponent;
 
 /// The main struct of this library. Manages the whole user interface.
-pub struct Ui<T> {
+pub struct Ui<T, E> {
     main_component: T,
+    marker: PhantomData<E>,
     shapes: Vec<Shape>,
     viewport: Vec2<u32>,
     mouse: Option<Vec2<u32>>,
@@ -16,14 +18,15 @@ pub struct Ui<T> {
 }
 
 /// Allows mutable access to the main component of the `Ui`.
-pub struct UiMainComponentMutRef<'a, T: 'a> where T: RawComponent {
-    ui: &'a mut Ui<T>,
+pub struct UiMainComponentMutRef<'a, T: 'a, E: 'a> where T: RawComponent<E> {
+    ui: &'a mut Ui<T, E>,
 }
 
-impl<T> Ui<T> where T: RawComponent {
-    pub fn new(component: T, viewport: Vec2<u32>) -> Ui<T> {
+impl<T, E> Ui<T, E> where T: RawComponent<E> {
+    pub fn new(component: T, viewport: Vec2<u32>) -> Ui<T, E> {
         let mut ui = Ui {
             main_component: component,
+            marker: PhantomData,
             shapes: Vec::new(),
             viewport: viewport,
             mouse: None,
@@ -53,7 +56,7 @@ impl<T> Ui<T> where T: RawComponent {
     }
 
     /// Gives a mutable access to the main component in order for you to modify it.
-    pub fn get_mut_main_component(&mut self) -> UiMainComponentMutRef<T> {
+    pub fn get_mut_main_component(&mut self) -> UiMainComponentMutRef<T, E> {
         UiMainComponentMutRef { ui: self }
     }
 
@@ -78,7 +81,7 @@ impl<T> Ui<T> where T: RawComponent {
     }
 }
 
-impl<'a, T> Deref for UiMainComponentMutRef<'a, T> where T: RawComponent {
+impl<'a, T, E> Deref for UiMainComponentMutRef<'a, T, E> where T: RawComponent<E> {
     type Target = T;
 
     fn deref(&self) -> &T {
@@ -86,13 +89,13 @@ impl<'a, T> Deref for UiMainComponentMutRef<'a, T> where T: RawComponent {
     }
 }
 
-impl<'a, T> DerefMut for UiMainComponentMutRef<'a, T> where T: RawComponent {
+impl<'a, T, E> DerefMut for UiMainComponentMutRef<'a, T, E> where T: RawComponent<E> {
     fn deref_mut(&mut self) -> &mut T {
         &mut self.ui.main_component
     }
 }
 
-impl<'a, T: 'a> Drop for UiMainComponentMutRef<'a, T> where T: RawComponent {
+impl<'a, T: 'a, E> Drop for UiMainComponentMutRef<'a, T, E> where T: RawComponent<E> {
     fn drop(&mut self) {
         self.ui.update();
     }

@@ -33,7 +33,7 @@ impl UiSystem {
 
             rectangle: (
                 {
-                    #[derive(Copy)]
+                    #[derive(Copy, Clone)]
                     struct Vertex {
                         position: [f32; 2],
                         tex_coords: [f32; 2],
@@ -52,7 +52,7 @@ impl UiSystem {
                 },
 
                 glium::IndexBuffer::new(display,
-                                        glium::index_buffer::TriangleStrip(vec![1 as u16, 2, 0, 3]))
+                                        glium::index::TriangleStrip(vec![1 as u16, 2, 0, 3]))
             ),
 
             rectangles_program: glium::Program::from_source(display, r"
@@ -100,7 +100,7 @@ impl UiSystem {
         }
     }
 
-    pub fn draw<T, U>(&self, target: &mut T, ui: &ui::Ui<U>) where T: Surface, U: ui::component::RawComponent {
+    pub fn draw<T, U, E>(&self, target: &mut T, ui: &ui::Ui<U, E>) where T: Surface, U: ui::component::RawComponent<E> {
         for shape in ui.draw().iter() {
             match shape {
                 &ui::Shape::Point { .. } => unimplemented!(),

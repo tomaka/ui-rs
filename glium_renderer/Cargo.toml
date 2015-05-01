@@ -6,7 +6,7 @@ authors = ["Pierre Krieger <pierre.krieger1708@gmail.com>"]
 
 [dependencies]
 nalgebra = "*"
-glium = "*"
+glium = "0.3"
 glutin = "*"
 glium_text = "*"
 

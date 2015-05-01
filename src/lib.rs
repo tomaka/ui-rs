@@ -1,4 +1,3 @@
-#![feature(core)]
 #![warn(missing_docs)]
 
 extern crate nalgebra;

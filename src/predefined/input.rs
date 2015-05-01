@@ -38,7 +38,7 @@ impl InputComponent {
     }
 }
 
-impl RawComponent for InputComponent {
+impl<E> RawComponent<E> for InputComponent {
     fn render(&mut self) -> Vec<Shape> {
         vec![
             Shape::Text {
@@ -50,7 +50,7 @@ impl RawComponent for InputComponent {
         ]
     }
 
-    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<E> {
         if position.is_some() && pressed {
             
         }
@@ -59,7 +59,7 @@ impl RawComponent for InputComponent {
     }
 
     fn hit_test(&mut self, pos: Vec2<f32>) -> bool {
-        pos.x >= 0.0 && pos.x < self.get_width() && pos.y >= 0.0 && pos.y < self.em
+        pos.x >= 0.0 && pos.x < RawComponent::<E>::get_width(self) && pos.y >= 0.0 && pos.y < self.em
     }
 
     fn get_width(&mut self) -> f32 {
@@ -68,9 +68,5 @@ impl RawComponent for InputComponent {
 
     fn get_height(&mut self) -> f32 {
         self.em
-    }
-
-    fn handle_raw_child_event(&mut self, _: usize, _: Box<Any>) -> Option<Box<Any>> {
-        unreachable!();
     }
 }

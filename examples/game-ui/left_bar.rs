@@ -26,11 +26,11 @@ impl ui::Component for LeftBarWidget {
     type EmittedEvent = LeftBarWidgetEvent;
     type ReceivedEvent = predefined::button::ButtonEvent;
 
-    fn get_layout(&mut self) -> ui::Layout {
-        ui::Layout::VerticalBox(self.buttons.iter_mut().map(|b| b as &mut RawComponent).collect())
+    fn get_layout(&mut self) -> ui::Layout<predefined::button::ButtonEvent> {
+        ui::Layout::VerticalBox(self.buttons.iter_mut().map(|b| b as &mut RawComponent<_>).collect())
     }
 
-    fn handle_child_event(&mut self, child_id: usize, _: &predefined::button::ButtonEvent)
+    fn handle_child_event(&mut self, child_id: usize, _: predefined::button::ButtonEvent)
                           -> Option<LeftBarWidgetEvent>
     {
         if child_id == 0 {

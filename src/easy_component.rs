@@ -1,22 +1,20 @@
-use std::any::Any;
-use std::marker::Reflect;
 use nalgebra::Vec2;
 
 use component::RawComponent;
 use Shape;
 
-pub trait Component: Reflect + Send + Sync + 'static {
+pub trait Component {
     /// What events type this component produces.
-    type EmittedEvent: Reflect + 'static = ();
+    type EmittedEvent = ();
 
     /// What events type this component expects to receive.
-    type ReceivedEvent: Reflect + 'static = ();
+    type ReceivedEvent = ();
 
     /// 
-    fn get_layout(&mut self) -> Layout;
+    fn get_layout(&mut self) -> Layout<Self::ReceivedEvent>;
 
     /// A child has produced an event.
-    fn handle_child_event(&mut self, child_id: usize, &Self::ReceivedEvent)
+    fn handle_child_event(&mut self, child_id: usize, Self::ReceivedEvent)
                           -> Option<Self::EmittedEvent>
     {
         None
@@ -47,23 +45,23 @@ pub trait Component: Reflect + Send + Sync + 'static {
     }
 }
 
-pub enum Layout<'a> {
-    SingleChild(&'a mut RawComponent),
+pub enum Layout<'a, E> {
+    SingleChild(&'a mut RawComponent<E>),
 
-    HorizontalBox(Vec<&'a mut RawComponent>),
+    HorizontalBox(Vec<&'a mut RawComponent<E>>),
 
-    VerticalBox(Vec<&'a mut RawComponent>),
+    VerticalBox(Vec<&'a mut RawComponent<E>>),
 
-    PositionnedChildren(Vec<PositionnedChild<'a>>),
+    PositionnedChildren(Vec<PositionnedChild<'a, E>>),
 }
 
-pub struct PositionnedChild<'a> {
-    pub child: &'a mut RawComponent,
+pub struct PositionnedChild<'a, E> {
+    pub child: &'a mut RawComponent<E>,
     pub x: f32,
     pub y: f32,
 }
 
-impl<T> RawComponent for T where T: Component {
+impl<T, E> RawComponent<E> for T where T: Component, E: From<T::EmittedEvent> {
     fn render(&mut self) -> Vec<Shape> {
         match self.get_layout() {
             Layout::SingleChild(child) => {
@@ -104,7 +102,7 @@ impl<T> RawComponent for T where T: Component {
         }
     }
 
-    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>> {
+    fn set_mouse_status(&mut self, position: Option<Vec2<f32>>, pressed: bool) -> Vec<E> {
         let events = match self.get_layout() {
             Layout::SingleChild(child) => {
                 child.set_mouse_status(position, pressed).into_iter().map(|ev| (0usize, ev)).collect::<Vec<_>>()
@@ -217,8 +215,8 @@ impl<T> RawComponent for T where T: Component {
         };
 
         events.into_iter().filter_map(|(id, ev)| {
-            self.handle_raw_child_event(id, ev)
-        }).collect()
+            self.handle_child_event(id, ev)
+        }).map(|e| From::from(e)).collect()
     }
 
     fn hit_test(&mut self, position: Vec2<f32>) -> bool {
@@ -323,17 +321,6 @@ impl<T> RawComponent for T where T: Component {
                 0.0
             },
         }
-    }
-
-    fn handle_raw_child_event(&mut self, child_id: usize, event: Box<Any>) -> Option<Box<Any>> {
-        let ev = if let Some(event) = event.downcast_ref() {
-            let event: &<Self as Component>::ReceivedEvent = event;
-            self.handle_child_event(child_id, event)
-        } else {
-            panic!("Mismatch between emitted and received events")
-        };
-
-        ev.map(|ev| Box::new(ev) as Box<Any>)
     }
 }
 

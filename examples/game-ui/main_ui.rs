@@ -28,17 +28,17 @@ impl ui::Component for MainUi {
     type EmittedEvent = MainUiEvent;
     type ReceivedEvent = left_bar::LeftBarWidgetEvent;
 
-    fn get_layout(&mut self) -> ui::Layout {
+    fn get_layout(&mut self) -> ui::Layout<left_bar::LeftBarWidgetEvent> {
         ui::Layout::PositionnedChildren(vec![
             ui::PositionnedChild {
-                child: &mut self.left_bar as &mut RawComponent,
+                child: &mut self.left_bar as &mut RawComponent<_>,
                 x: -0.5,
                 y: 0.0,
             }
         ])
     }
 
-    fn handle_child_event(&mut self, child_id: usize, _: &left_bar::LeftBarWidgetEvent)
+    fn handle_child_event(&mut self, child_id: usize, _: left_bar::LeftBarWidgetEvent)
                           -> Option<MainUiEvent>
     {
         None

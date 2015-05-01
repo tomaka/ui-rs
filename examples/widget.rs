@@ -4,7 +4,6 @@ extern crate glutin;
 extern crate ui;
 
 use std::default::Default;
-use std::iter::AdditiveIterator;
 use glium::Surface;
 
 struct MyWidget {
@@ -42,11 +41,11 @@ impl ui::Component for MyWidget {
     type EmittedEvent = MyWidgetEvent;
     type ReceivedEvent = ui::predefined::button::ButtonEvent;
 
-    fn get_layout(&mut self) -> ui::Layout {
+    fn get_layout(&mut self) -> ui::Layout<ui::predefined::button::ButtonEvent> {
         ui::Layout::HorizontalBox(vec![&mut self.left_button, &mut self.text, &mut self.right_button])
     }
 
-    fn handle_child_event(&mut self, child_id: usize, _: &ui::predefined::button::ButtonEvent)
+    fn handle_child_event(&mut self, child_id: usize, _: ui::predefined::button::ButtonEvent)
                           -> Option<MyWidgetEvent>
     {
         if child_id == 0 {
@@ -80,14 +79,14 @@ impl ui::Component for MyWidgetWithWidgets {
     type EmittedEvent = ();
     type ReceivedEvent = MyWidgetEvent;
 
-    fn get_layout(&mut self) -> ui::Layout {
-        let mut b: Vec<_> = self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent).collect();
+    fn get_layout(&mut self) -> ui::Layout<MyWidgetEvent> {
+        let mut b: Vec<_> = self.widgets.iter_mut().map(|w| w as &mut ui::component::RawComponent<_>).collect();
         b.push(&mut self.text);
         ui::Layout::VerticalBox(b)
     }
 
-    fn handle_child_event(&mut self, _: usize, _: &MyWidgetEvent) -> Option<()> {
-        let val = self.widgets.iter().map(|w| w.get_number()).sum();
+    fn handle_child_event(&mut self, _: usize, _: MyWidgetEvent) -> Option<()> {
+        let val = self.widgets.iter().map(|w| w.get_number()).fold(0, |a, e| a + e);
         self.text.set_text(format!("{}", val));
         None
     }
@@ -103,7 +102,7 @@ fn main() {
 
     let system = glium_renderer::UiSystem::new(&display);
 
-    let mut ui = ui::Ui::new(<MyWidgetWithWidgets as Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
+    let mut ui: ui::Ui<_, ()> = ui::Ui::new(<MyWidgetWithWidgets as Default>::default(), ui::Vec2::new(dimensions.0, dimensions.1));
 
     'main: loop {
         let mut target = display.draw();

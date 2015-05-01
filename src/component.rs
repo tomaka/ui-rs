@@ -4,17 +4,14 @@ use nalgebra::Vec2;
 use shape::Shape;
 
 /// Represents a raw component. Don't implement this directly.
-pub trait RawComponent {
+pub trait RawComponent<E> {
     /// Obtain the look of this component.
     fn render(&mut self) -> Vec<Shape>;
-
-    /// Handles an event received by a child and returns an event to propagate to its parent.
-    fn handle_raw_child_event(&mut self, child_id: usize, event: Box<Any>) -> Option<Box<Any>>;
 
     /// Tells the component where the mouse is. `None` if the mouse is not over the element.
     ///
     /// Returns a list of events to pass to the parent.
-    fn set_mouse_status(&mut self, Option<Vec2<f32>>, pressed: bool) -> Vec<Box<Any>>;
+    fn set_mouse_status(&mut self, Option<Vec2<f32>>, pressed: bool) -> Vec<E>;
 
     /// Asks the component whether the given position touches it.
     fn hit_test(&mut self, Vec2<f32>) -> bool;
